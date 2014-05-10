@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyaem.packagemanager &mdash; pyaem  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyaem  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">pyaem  documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyaem.packagemanager</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">bagofrequests</span> <span class="k">as</span> <span class="n">bag</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">handlers</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pycurl</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">result</span> <span class="k">as</span> <span class="n">res</span>
+
+<div class="viewcode-block" id="PackageManager"><a class="viewcode-back" href="../../pyaem.html#pyaem.packagemanager.PackageManager">[docs]</a><span class="k">class</span> <span class="nc">PackageManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">&#39;body&#39;</span><span class="p">])</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;msg&#39;</span><span class="p">]</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;success&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">failure</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok</span><span class="p">,</span>
+            <span class="mi">401</span><span class="p">:</span> <span class="n">handlers</span><span class="o">.</span><span class="n">auth_fail</span><span class="p">,</span>
+            <span class="mi">405</span><span class="p">:</span> <span class="n">handlers</span><span class="o">.</span><span class="n">method_not_allowed</span>
+        <span class="p">}</span>
+
+
+<div class="viewcode-block" id="PackageManager.create_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.packagemanager.PackageManager.create_package">[docs]</a>    <span class="k">def</span> <span class="nf">create_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;cmd&#39;</span><span class="p">:</span> <span class="s">&#39;create&#39;</span><span class="p">,</span>
+            <span class="s">&#39;groupName&#39;</span><span class="p">:</span> <span class="n">group_name</span><span class="p">,</span>
+            <span class="s">&#39;packageName&#39;</span><span class="p">:</span> <span class="n">package_name</span><span class="p">,</span>
+            <span class="s">&#39;packageVersion&#39;</span><span class="p">:</span> <span class="n">package_version</span><span class="p">,</span>
+            <span class="s">&#39;_charset_&#39;</span><span class="p">:</span> <span class="s">&#39;utf-8&#39;</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/crx/packmgr/service/.json/etc/packages/{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">package_name</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PackageManager.update_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.packagemanager.PackageManager.update_package">[docs]</a>    <span class="k">def</span> <span class="nf">update_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;groupName&#39;</span><span class="p">:</span> <span class="n">group_name</span><span class="p">,</span>
+            <span class="s">&#39;packageName&#39;</span><span class="p">:</span> <span class="n">package_name</span><span class="p">,</span>
+            <span class="s">&#39;version&#39;</span><span class="p">:</span> <span class="n">package_version</span><span class="p">,</span>
+            <span class="s">&#39;path&#39;</span><span class="p">:</span> <span class="s">&#39;/etc/packages/{0}/{1}-{2}.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">),</span>
+            <span class="s">&#39;_charset_&#39;</span><span class="p">:</span> <span class="s">&#39;utf-8&#39;</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;get&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/crx/packmgr/update.jsp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PackageManager.build_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.packagemanager.PackageManager.build_package">[docs]</a>    <span class="k">def</span> <span class="nf">build_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;cmd&#39;</span><span class="p">:</span> <span class="s">&#39;build&#39;</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/crx/packmgr/service/.json/etc/packages/{1}/{2}-{3}.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PackageManager.download_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.packagemanager.PackageManager.download_package">[docs]</a>    <span class="k">def</span> <span class="nf">download_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok_download</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;{0} was successfully downloaded&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;file&#39;</span><span class="p">])</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok_download</span>
+        <span class="p">}</span>
+
+        <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="s">&#39;{0}/{1}-{2}.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/etc/packages/{1}/{2}-{3}.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">opts</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PackageManager.upload_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.packagemanager.PackageManager.upload_package">[docs]</a>    <span class="k">def</span> <span class="nf">upload_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;{0}-{1}.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">)</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;cmd&#39;</span><span class="p">:</span> <span class="s">&#39;upload&#39;</span><span class="p">,</span>
+            <span class="s">&#39;package&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">pycurl</span><span class="o">.</span><span class="n">FORM_FILE</span><span class="p">,</span> <span class="s">&#39;{0}/{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">))</span>
+        <span class="p">}</span>
+
+        <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;file_name&#39;</span><span class="p">:</span> <span class="n">file_name</span>
+        <span class="p">}</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/crx/packmgr/service/.json/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">opts</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PackageManager.install_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.packagemanager.PackageManager.install_package">[docs]</a>    <span class="k">def</span> <span class="nf">install_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;cmd&#39;</span><span class="p">:</span> <span class="s">&#39;install&#39;</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/crx/packmgr/service/.json/etc/packages/{1}/{2}-{3}.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PackageManager.replicate_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.packagemanager.PackageManager.replicate_package">[docs]</a>    <span class="k">def</span> <span class="nf">replicate_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;cmd&#39;</span><span class="p">:</span> <span class="s">&#39;replicate&#39;</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/crx/packmgr/service/.json/etc/packages/{1}/{2}-{3}.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PackageManager.delete_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.packagemanager.PackageManager.delete_package">[docs]</a>    <span class="k">def</span> <span class="nf">delete_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;cmd&#39;</span><span class="p">:</span> <span class="s">&#39;delete&#39;</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/crx/packmgr/service/.json/etc/packages/{1}/{2}-{3}.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">pyaem  documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

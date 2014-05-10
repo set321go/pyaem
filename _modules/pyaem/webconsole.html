@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyaem.webconsole &mdash; pyaem  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyaem  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">pyaem  documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyaem.webconsole</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">bagofrequests</span> <span class="k">as</span> <span class="n">bag</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">handlers</span>
+<span class="kn">import</span> <span class="nn">pycurl</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">result</span> <span class="k">as</span> <span class="n">res</span>
+
+<div class="viewcode-block" id="WebConsole"><a class="viewcode-back" href="../../pyaem.html#pyaem.webconsole.WebConsole">[docs]</a><span class="k">class</span> <span class="nc">WebConsole</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_bundle_not_found</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Bundle {0} not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;bundle_name&#39;</span><span class="p">])</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">failure</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">401</span><span class="p">:</span> <span class="n">handlers</span><span class="o">.</span><span class="n">auth_fail</span><span class="p">,</span>
+            <span class="mi">404</span><span class="p">:</span> <span class="n">_handler_bundle_not_found</span><span class="p">,</span>
+            <span class="mi">405</span><span class="p">:</span> <span class="n">handlers</span><span class="o">.</span><span class="n">method_not_allowed</span>
+        <span class="p">}</span>
+
+
+<div class="viewcode-block" id="WebConsole.start_bundle"><a class="viewcode-back" href="../../pyaem.html#pyaem.webconsole.WebConsole.start_bundle">[docs]</a>    <span class="k">def</span> <span class="nf">start_bundle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok_start</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Bundle {0} was successfully started&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;bundle_name&#39;</span><span class="p">])</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="s">&#39;start&#39;</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok_start</span>
+        <span class="p">}</span>
+
+        <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;bundle_name&#39;</span><span class="p">:</span> <span class="n">bundle_name</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/system/console/bundles/{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">opts</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="WebConsole.stop_bundle"><a class="viewcode-back" href="../../pyaem.html#pyaem.webconsole.WebConsole.stop_bundle">[docs]</a>    <span class="k">def</span> <span class="nf">stop_bundle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok_stop</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Bundle {0} was successfully stopped&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;bundle_name&#39;</span><span class="p">])</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="s">&#39;stop&#39;</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok_stop</span>
+        <span class="p">}</span>
+
+        <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;bundle_name&#39;</span><span class="p">:</span> <span class="n">bundle_name</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/system/console/bundles/{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">opts</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="WebConsole.install_bundle"><a class="viewcode-back" href="../../pyaem.html#pyaem.webconsole.WebConsole.install_bundle">[docs]</a>    <span class="k">def</span> <span class="nf">install_bundle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">,</span> <span class="n">bundle_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok_install</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Bundle {0} was successfully installed&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;bundle_name&#39;</span><span class="p">])</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;{0}-{1}.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bundle_name</span><span class="p">,</span> <span class="n">bundle_version</span><span class="p">)</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;action&#39;</span><span class="p">:</span> <span class="s">&#39;install&#39;</span><span class="p">,</span>
+            <span class="s">&#39;bundlefile&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">pycurl</span><span class="o">.</span><span class="n">FORM_FILE</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok_install</span>
+        <span class="p">}</span>
+
+        <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;bundle_name&#39;</span><span class="p">:</span> <span class="n">bundle_name</span>
+        <span class="p">}</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/system/console/bundles&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">opts</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">pyaem  documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

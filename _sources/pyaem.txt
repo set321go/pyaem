@@ -1,0 +1,86 @@
+pyaem package
+=============
+
+Submodules
+----------
+
+pyaem.bagofrequests module
+--------------------------
+
+.. automodule:: pyaem.bagofrequests
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyaem.contentrepo module
+------------------------
+
+.. automodule:: pyaem.contentrepo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyaem.exception module
+----------------------
+
+.. automodule:: pyaem.exception
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyaem.handlers module
+---------------------
+
+.. automodule:: pyaem.handlers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyaem.packagemanager module
+---------------------------
+
+.. automodule:: pyaem.packagemanager
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyaem.packagemanagersync module
+-------------------------------
+
+.. automodule:: pyaem.packagemanagersync
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyaem.pyaem module
+------------------
+
+.. automodule:: pyaem.pyaem
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyaem.result module
+-------------------
+
+.. automodule:: pyaem.result
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pyaem.webconsole module
+-----------------------
+
+.. automodule:: pyaem.webconsole
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: pyaem
+    :members:
+    :undoc-members:
+    :show-inheritance:

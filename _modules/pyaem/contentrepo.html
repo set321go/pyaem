@@ -1,0 +1,464 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyaem.contentrepo &mdash; pyaem  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyaem  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">pyaem  documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyaem.contentrepo</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">bagofrequests</span> <span class="k">as</span> <span class="n">bag</span>
+<span class="kn">from</span> <span class="nn">BeautifulSoup</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">handlers</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">result</span> <span class="k">as</span> <span class="n">res</span>
+
+<span class="n">HEX_MASSAGE</span> <span class="o">=</span> <span class="p">[(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;&amp;#x([^;]+);&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="s">&#39;&amp;#</span><span class="si">%d</span><span class="s">;&#39;</span> <span class="o">%</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">16</span><span class="p">))]</span>
+
+<div class="viewcode-block" id="ContentRepo"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo">[docs]</a><span class="k">class</span> <span class="nc">ContentRepo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">401</span><span class="p">:</span> <span class="n">handlers</span><span class="o">.</span><span class="n">auth_fail</span><span class="p">,</span>
+            <span class="mi">405</span><span class="p">:</span> <span class="n">handlers</span><span class="o">.</span><span class="n">method_not_allowed</span>
+        <span class="p">}</span>
+
+
+<div class="viewcode-block" id="ContentRepo.create_path"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo.create_path">[docs]</a>    <span class="k">def</span> <span class="nf">create_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_exist</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Path {0} already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Path {0} created&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_exist</span><span class="p">,</span>
+            <span class="mi">201</span><span class="p">:</span> <span class="n">_handler_ok</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ContentRepo.activate_path"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo.activate_path">[docs]</a>    <span class="k">def</span> <span class="nf">activate_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">&#39;body&#39;</span><span class="p">],</span>
+                <span class="n">convertEntities</span><span class="o">=</span><span class="n">BeautifulSoup</span><span class="o">.</span><span class="n">HTML_ENTITIES</span><span class="p">,</span>
+                <span class="n">markupMassage</span><span class="o">=</span><span class="n">HEX_MASSAGE</span>
+            <span class="p">)</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39;error&#39;</span><span class="p">})</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Path {0} activated&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">string</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">failure</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;cmd&#39;</span><span class="p">:</span> <span class="s">&#39;activate&#39;</span><span class="p">,</span>
+            <span class="s">&#39;path&#39;</span><span class="p">:</span> <span class="n">path</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/etc/replication/treeactivation.html&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ContentRepo.create_user"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo.create_user">[docs]</a>    <span class="k">def</span> <span class="nf">create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_path</span><span class="p">,</span> <span class="n">user_name</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;User {0}/{1} created&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span> <span class="n">user_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">def</span> <span class="nf">_handler_exist_or_error</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">&#39;body&#39;</span><span class="p">],</span>
+                <span class="n">convertEntities</span><span class="o">=</span><span class="n">BeautifulSoup</span><span class="o">.</span><span class="n">HTML_ENTITIES</span><span class="p">,</span>
+                <span class="n">markupMassage</span><span class="o">=</span><span class="n">HEX_MASSAGE</span>
+            <span class="p">)</span>
+            <span class="n">message_elem</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;div&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="s">&#39;Message&#39;</span><span class="p">})</span>
+            <span class="k">if</span> <span class="n">message_elem</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">message_elem</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">exist_message</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;org.apache.jackrabbit.api.security.user.AuthorizableExistsException: &#39;</span> <span class="o">+</span>
+                <span class="s">&#39;User or Group for </span><span class="se">\&#39;</span><span class="s">{0}</span><span class="se">\&#39;</span><span class="s"> already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_name</span><span class="p">))</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="o">==</span> <span class="n">exist_message</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;User {0}/{1} already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span> <span class="n">user_name</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">failure</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;createUser&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="s">&#39;authorizableId&#39;</span><span class="p">:</span> <span class="n">user_name</span><span class="p">,</span>
+            <span class="s">&#39;rep:password&#39;</span><span class="p">:</span> <span class="n">password</span><span class="p">,</span>
+            <span class="s">&#39;intermediatePath&#39;</span><span class="p">:</span> <span class="n">user_path</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">201</span><span class="p">:</span> <span class="n">_handler_ok</span><span class="p">,</span>
+            <span class="mi">500</span><span class="p">:</span> <span class="n">_handler_exist_or_error</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/libs/granite/security/post/authorizables&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ContentRepo.add_user_to_group"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo.add_user_to_group">[docs]</a>    <span class="k">def</span> <span class="nf">add_user_to_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_name</span><span class="p">,</span> <span class="n">group_path</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;User {0} added to group {1}/{2}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_name</span><span class="p">,</span> <span class="n">group_path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span> <span class="n">group_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;addMembers&#39;</span><span class="p">:</span> <span class="n">user_name</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/{1}/{2}.rw.html&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">group_path</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span> <span class="n">group_name</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ContentRepo.create_group"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo.create_group">[docs]</a>    <span class="k">def</span> <span class="nf">create_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_path</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Group {0}/{1} created&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">group_path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span> <span class="n">group_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">def</span> <span class="nf">_handler_exist_or_error</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">&#39;body&#39;</span><span class="p">],</span>
+                <span class="n">convertEntities</span><span class="o">=</span><span class="n">BeautifulSoup</span><span class="o">.</span><span class="n">HTML_ENTITIES</span><span class="p">,</span>
+                <span class="n">markupMassage</span><span class="o">=</span><span class="n">HEX_MASSAGE</span>
+            <span class="p">)</span>
+            <span class="n">message_elem</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;div&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="s">&#39;Message&#39;</span><span class="p">})</span>
+            <span class="k">if</span> <span class="n">message_elem</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">message_elem</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">exist_message</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;org.apache.jackrabbit.api.security.user.AuthorizableExistsException: &#39;</span> <span class="o">+</span>
+                <span class="s">&#39;User or Group for </span><span class="se">\&#39;</span><span class="s">{0}</span><span class="se">\&#39;</span><span class="s"> already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">group_name</span><span class="p">))</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="o">==</span> <span class="n">exist_message</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Group {0}/{1} already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">group_path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span> <span class="n">group_name</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">failure</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;createGroup&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+            <span class="s">&#39;authorizableId&#39;</span><span class="p">:</span> <span class="n">group_name</span><span class="p">,</span>
+            <span class="s">&#39;profile/givenName&#39;</span><span class="p">:</span> <span class="n">group_name</span><span class="p">,</span>
+            <span class="s">&#39;intermediatePath&#39;</span><span class="p">:</span> <span class="n">group_path</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">201</span><span class="p">:</span> <span class="n">_handler_ok</span><span class="p">,</span>
+            <span class="mi">500</span><span class="p">:</span> <span class="n">_handler_exist_or_error</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/libs/granite/security/post/authorizables&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ContentRepo.change_password"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo.change_password">[docs]</a>    <span class="k">def</span> <span class="nf">change_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_path</span><span class="p">,</span> <span class="n">user_name</span><span class="p">,</span> <span class="n">old_password</span><span class="p">,</span> <span class="n">new_password</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;User {0}/{1} password changed&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span> <span class="n">user_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;:currentPassword&#39;</span><span class="p">:</span> <span class="n">old_password</span><span class="p">,</span>
+            <span class="s">&#39;rep:password&#39;</span><span class="p">:</span> <span class="n">new_password</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/{1}/{2}.rw.html&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">user_path</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">),</span> <span class="n">user_name</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ContentRepo.set_permission"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo.set_permission">[docs]</a>    <span class="k">def</span> <span class="nf">set_permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_or_group_name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">permissions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Permissions {0} set on path {1} for user/group {2}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">permissions</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">user_or_group_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">def</span> <span class="nf">_handler_not_found</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">&#39;body&#39;</span><span class="p">],</span>
+                <span class="n">convertEntities</span><span class="o">=</span><span class="n">BeautifulSoup</span><span class="o">.</span><span class="n">HTML_ENTITIES</span><span class="p">,</span>
+                <span class="n">markupMassage</span><span class="o">=</span><span class="n">HEX_MASSAGE</span>
+            <span class="p">)</span>
+            <span class="n">message_elem</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;div&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="s">&#39;Message&#39;</span><span class="p">})</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">message_elem</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">failure</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;authorizableId&#39;</span><span class="p">:</span> <span class="n">user_or_group_name</span><span class="p">,</span>
+            <span class="s">&#39;changelog&#39;</span><span class="p">:</span> <span class="s">&#39;path:{0},{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">permissions</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok</span><span class="p">,</span>
+            <span class="mi">404</span><span class="p">:</span> <span class="n">_handler_not_found</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/.cqactions.html&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ContentRepo.create_agent"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo.create_agent">[docs]</a>    <span class="k">def</span> <span class="nf">create_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">agent_type</span><span class="p">,</span> <span class="n">dest_username</span><span class="p">,</span> <span class="n">dest_password</span><span class="p">,</span> <span class="n">dest_url</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok_created</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;{0} agent {1} created&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run_mode</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok_updated</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;{0} agent {1} updated&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run_mode</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">if</span> <span class="n">agent_type</span> <span class="o">==</span> <span class="s">&#39;flush&#39;</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;jcr:content/cq:name&#39;</span><span class="p">:</span> <span class="s">&#39;flush&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jcr:content/protocolHTTPHeaders&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;CQ-Action:{action}&#39;</span><span class="p">,</span> <span class="s">&#39;CQ-Handle:{path}&#39;</span><span class="p">,</span> <span class="s">&#39;CQ-Path:{path}&#39;</span><span class="p">],</span>
+                <span class="s">&#39;jcr:content/protocolHTTPHeaders@TypeHint&#39;</span><span class="p">:</span> <span class="s">&#39;String[]&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jcr:content/protocolHTTPMethod&#39;</span><span class="p">:</span> <span class="s">&#39;GET&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jcr:content/serializationType&#39;</span><span class="p">:</span> <span class="s">&#39;flush&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jcr:content/noVersioning&#39;</span><span class="p">:</span> <span class="s">&#39;true&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jcr:content/jcr:mixinTypes&#39;</span><span class="p">:</span> <span class="s">&#39;cq:ReplicationStatus&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jcr:content/triggerReceive&#39;</span><span class="p">:</span> <span class="s">&#39;true&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jcr:content/triggerSpecific&#39;</span><span class="p">:</span> <span class="s">&#39;true&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jcr:content/transportUri&#39;</span><span class="p">:</span> <span class="s">&#39;{0}/dispatcher/invalidate.cache&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dest_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;jcr:content/serializationType&#39;</span><span class="p">:</span> <span class="s">&#39;durbo&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jcr:content/transportUri&#39;</span><span class="p">:</span> <span class="s">&#39;{0}/bin/receive?sling:authRequestLogin=1&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dest_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">))</span>
+            <span class="p">}</span>
+
+        <span class="n">params</span><span class="p">[</span><span class="s">&#39;jcr:primaryType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;cq:Page&#39;</span>
+        <span class="n">params</span><span class="p">[</span><span class="s">&#39;jcr:content/sling:resourceType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;/libs/cq/replication/components/agent&#39;</span>
+        <span class="n">params</span><span class="p">[</span><span class="s">&#39;jcr:content/cq:template&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;/libs/cq/replication/templates/agent&#39;</span>
+        <span class="n">params</span><span class="p">[</span><span class="s">&#39;jcr:content/enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;true&#39;</span>
+
+        <span class="k">if</span> <span class="n">dest_username</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">&#39;jcr:content/transportUser&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dest_username</span>
+        <span class="k">if</span> <span class="n">dest_password</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">&#39;jcr:content/transportPassword&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dest_password</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">200</span><span class="p">:</span> <span class="n">_handler_ok_updated</span><span class="p">,</span>
+            <span class="mi">201</span><span class="p">:</span> <span class="n">_handler_ok_created</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;post&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/etc/replication/agents.{1}/{2}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ContentRepo.delete_agent"><a class="viewcode-back" href="../../pyaem.html#pyaem.contentrepo.ContentRepo.delete_agent">[docs]</a>    <span class="k">def</span> <span class="nf">delete_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">_handler_ok</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;{0} agent {1} deleted&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run_mode</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">def</span> <span class="nf">_handler_not_found</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;{0} agent {1} not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run_mode</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">PyAemResult</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">}</span>
+
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">204</span><span class="p">:</span> <span class="n">_handler_ok</span><span class="p">,</span>
+            <span class="mi">404</span><span class="p">:</span> <span class="n">_handler_not_found</span>
+        <span class="p">}</span>
+
+        <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;delete&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}/etc/replication/agents.{1}/{2}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">_handlers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">+</span> <span class="n">_handlers</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span>
+
+        <span class="k">return</span> <span class="n">bag</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_handlers</span><span class="p">,</span> <span class="o">**</span><span class="n">opts</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">pyaem  documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyaem.pyaem &mdash; pyaem  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="pyaem  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">pyaem  documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyaem.pyaem</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">contentrepo</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">packagemanager</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">packagemanagersync</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">webconsole</span>
+
+<div class="viewcode-block" id="PyAem"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem">[docs]</a><span class="k">class</span> <span class="nc">PyAem</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">use_ssl</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">protocol</span> <span class="o">=</span> <span class="s">&#39;http&#39;</span> <span class="k">if</span> <span class="n">use_ssl</span> <span class="o">==</span> <span class="bp">False</span> <span class="k">else</span> <span class="s">&#39;https&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s">&#39;{0}://{1}:{2}@{3}:{4}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span> <span class="o">=</span> <span class="n">contentrepo</span><span class="o">.</span><span class="n">ContentRepo</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span> <span class="o">=</span> <span class="n">packagemanager</span><span class="o">.</span><span class="n">PackageManager</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">package_manager_sync</span> <span class="o">=</span> <span class="n">packagemanagersync</span><span class="o">.</span><span class="n">PackageManagerSync</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">web_console</span> <span class="o">=</span> <span class="n">webconsole</span><span class="o">.</span><span class="n">WebConsole</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+
+    <span class="c"># content repo methods</span>
+
+
+<div class="viewcode-block" id="PyAem.create_path"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.create_path">[docs]</a>    <span class="k">def</span> <span class="nf">create_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span><span class="o">.</span><span class="n">create_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.activate_path"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.activate_path">[docs]</a>    <span class="k">def</span> <span class="nf">activate_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span><span class="o">.</span><span class="n">activate_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.create_user"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.create_user">[docs]</a>    <span class="k">def</span> <span class="nf">create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_path</span><span class="p">,</span> <span class="n">user_name</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span><span class="o">.</span><span class="n">create_user</span><span class="p">(</span><span class="n">user_path</span><span class="p">,</span> <span class="n">user_name</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.add_user_to_group"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.add_user_to_group">[docs]</a>    <span class="k">def</span> <span class="nf">add_user_to_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_name</span><span class="p">,</span> <span class="n">group_path</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span><span class="o">.</span><span class="n">add_user_to_group</span><span class="p">(</span><span class="n">user_name</span><span class="p">,</span> <span class="n">group_path</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.create_group"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.create_group">[docs]</a>    <span class="k">def</span> <span class="nf">create_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_path</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">group_path</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.change_password"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.change_password">[docs]</a>    <span class="k">def</span> <span class="nf">change_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_path</span><span class="p">,</span> <span class="n">user_name</span><span class="p">,</span> <span class="n">old_password</span><span class="p">,</span> <span class="n">new_password</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span><span class="o">.</span><span class="n">change_password</span><span class="p">(</span><span class="n">user_path</span><span class="p">,</span> <span class="n">user_name</span><span class="p">,</span> <span class="n">old_password</span><span class="p">,</span> <span class="n">new_password</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.set_permission"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.set_permission">[docs]</a>    <span class="k">def</span> <span class="nf">set_permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_or_group_name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">permissions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span><span class="o">.</span><span class="n">set_permission</span><span class="p">(</span><span class="n">user_or_group_name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">permissions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.create_agent"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.create_agent">[docs]</a>    <span class="k">def</span> <span class="nf">create_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">agent_type</span><span class="p">,</span> <span class="n">dest_username</span><span class="p">,</span> <span class="n">dest_password</span><span class="p">,</span> <span class="n">dest_url</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span><span class="o">.</span><span class="n">create_agent</span><span class="p">(</span>
+            <span class="n">agent_name</span><span class="p">,</span> <span class="n">agent_type</span><span class="p">,</span> <span class="n">dest_username</span><span class="p">,</span> <span class="n">dest_password</span><span class="p">,</span> <span class="n">dest_url</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.delete_agent"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.delete_agent">[docs]</a>    <span class="k">def</span> <span class="nf">delete_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_repo</span><span class="o">.</span><span class="n">delete_agent</span><span class="p">(</span><span class="n">agent_name</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+    <span class="c"># package manager methods</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.create_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.create_package">[docs]</a>    <span class="k">def</span> <span class="nf">create_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span><span class="o">.</span><span class="n">create_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.update_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.update_package">[docs]</a>    <span class="k">def</span> <span class="nf">update_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span><span class="o">.</span><span class="n">update_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.build_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.build_package">[docs]</a>    <span class="k">def</span> <span class="nf">build_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span><span class="o">.</span><span class="n">build_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.download_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.download_package">[docs]</a>    <span class="k">def</span> <span class="nf">download_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span><span class="o">.</span><span class="n">download_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.upload_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.upload_package">[docs]</a>    <span class="k">def</span> <span class="nf">upload_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span><span class="o">.</span><span class="n">upload_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.install_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.install_package">[docs]</a>    <span class="k">def</span> <span class="nf">install_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span><span class="o">.</span><span class="n">install_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.replicate_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.replicate_package">[docs]</a>    <span class="k">def</span> <span class="nf">replicate_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span><span class="o">.</span><span class="n">replicate_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.delete_package"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.delete_package">[docs]</a>    <span class="k">def</span> <span class="nf">delete_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager</span><span class="o">.</span><span class="n">delete_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+    <span class="c"># synchronous package manager methods</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.upload_package_sync"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.upload_package_sync">[docs]</a>    <span class="k">def</span> <span class="nf">upload_package_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager_sync</span><span class="o">.</span><span class="n">upload_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.install_package_sync"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.install_package_sync">[docs]</a>    <span class="k">def</span> <span class="nf">install_package_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager_sync</span><span class="o">.</span><span class="n">install_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.replicate_package_sync"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.replicate_package_sync">[docs]</a>    <span class="k">def</span> <span class="nf">replicate_package_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_manager_sync</span><span class="o">.</span><span class="n">replicate_package</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">package_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+    <span class="c"># web console methods</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.start_bundle"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.start_bundle">[docs]</a>    <span class="k">def</span> <span class="nf">start_bundle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">web_console</span><span class="o">.</span><span class="n">start_bundle</span><span class="p">(</span><span class="n">bundle_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.stop_bundle"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.stop_bundle">[docs]</a>    <span class="k">def</span> <span class="nf">stop_bundle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">web_console</span><span class="o">.</span><span class="n">stop_bundle</span><span class="p">(</span><span class="n">bundle_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PyAem.install_bundle"><a class="viewcode-back" href="../../pyaem.html#pyaem.pyaem.PyAem.install_bundle">[docs]</a>    <span class="k">def</span> <span class="nf">install_bundle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle_name</span><span class="p">,</span> <span class="n">bundle_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">web_console</span><span class="o">.</span><span class="n">install_bundle</span><span class="p">(</span><span class="n">bundle_name</span><span class="p">,</span> <span class="n">bundle_version</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">pyaem  documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
