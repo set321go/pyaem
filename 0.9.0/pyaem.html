@@ -58,17 +58,90 @@
 <dl class="function">
 <dt id="pyaem.bagofrequests.download_file">
 <tt class="descclassname">pyaem.bagofrequests.</tt><tt class="descname">download_file</tt><big>(</big><em>url</em>, <em>params</em>, <em>handlers</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/pyaem/bagofrequests.html#download_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyaem.bagofrequests.download_file" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Downloads a file from specified URL, the file will be downloaded to path specified in file kwarg.
+Parameters will be appended to URL automatically on HTTP get method.
+Response code will then be used to determine which handler should process the response.
+When response code does not match any handler, an exception will be raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> (<em>str</em>) &#8211; URL to send HTTP request to</li>
+<li><strong>params</strong> (<em>dict</em>) &#8211; Request parameters key-value pairs, use array value to represent multi parameters with the same name</li>
+<li><strong>handlers</strong> (<em>dict</em>) &#8211; Response handlers key-value pairs, keys are response http code, values are callback methods</li>
+<li><strong>kwargs</strong> (<em>dict</em>) &#8211; file (str) &#8211; Location where the downloaded file will be saved to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">PyAemResult &#8211; The result containing status, response http code and body, and request info</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">PyAemException</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="pyaem.bagofrequests.request">
 <tt class="descclassname">pyaem.bagofrequests.</tt><tt class="descname">request</tt><big>(</big><em>method</em>, <em>url</em>, <em>params</em>, <em>handlers</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/pyaem/bagofrequests.html#request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyaem.bagofrequests.request" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Sends HTTP request to a specified URL.
+Parameters will be appended to URL automatically on HTTP get method.
+Response code will then be used to determine which handler should process the response.
+When response code does not match any handler, an exception will be raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>method</strong> (<em>str</em>) &#8211; HTTP method (post, delete, get)</li>
+<li><strong>url</strong> (<em>str</em>) &#8211; URL to send HTTP request to</li>
+<li><strong>params</strong> (<em>dict</em>) &#8211; Request parameters key-value pairs, use array value to represent multi parameters with the same name</li>
+<li><strong>handlers</strong> (<em>dict</em>) &#8211; Response handlers key-value pairs, keys are response http code, values are callback methods</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">PyAemResult &#8211; Result of the request containing status, response http code and body, and request info</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">PyAemException</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="pyaem.bagofrequests.upload_file">
 <tt class="descclassname">pyaem.bagofrequests.</tt><tt class="descname">upload_file</tt><big>(</big><em>url</em>, <em>params</em>, <em>handlers</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/pyaem/bagofrequests.html#upload_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyaem.bagofrequests.upload_file" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Uploads a file using the specified URL endpoint,
+the file to be uploaded must be available at the specified location in file kwarg.
+Parameters will be appended to URL automatically on HTTP get method.
+Response code will then be used to determine which handler should process the response.
+When response code does not match any handler, an exception will be raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> (<em>str</em>) &#8211; URL to send HTTP request to</li>
+<li><strong>params</strong> (<em>dict</em>) &#8211; Request parameters key-value pairs, use array value to represent multi parameters with the same name</li>
+<li><strong>handlers</strong> (<em>dict</em>) &#8211; Response handlers key-value pairs, keys are response http code, values are callback methods</li>
+<li><strong>kwargs</strong> (<em>dict</em>) &#8211; file (str) &#8211; Location of the file to be uploaded</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">PyAemResult &#8211; The result containing status, response http code and body, and request info</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">PyAemException</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 <div class="section" id="module-pyaem.contentrepo">
