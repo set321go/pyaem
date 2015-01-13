@@ -17,7 +17,7 @@ class PyTest(TestCommand):
 setup(
     name='pyaem',
     version='0.9.1',
-    url='http://github.com/cliffano/pyaem/',
+    url='https://github.com/Sensis/pyaem/',
     license='MIT License',
     author='Cliffano Subagio',
     tests_require=['mock', 'pytest'],
